@@ -78,6 +78,7 @@ pub struct Writer {
 }
 
 impl Writer {
+    /// Write a string to the buffer
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
@@ -88,6 +89,7 @@ impl Writer {
             }
         }
     }
+
     /// Writes a byte to the buffer, substituting '\n' for a new line
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
@@ -159,4 +161,26 @@ macro_rules! println {
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
+}
+
+#[test_case]
+fn test_println_simple() {
+    println!("Some simple output :)");
+}
+
+#[test_case]
+fn test_println_many() {
+    for i in 0..200 {
+        println!("Output #{}", i);
+    }
+}
+
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string which doth fit on a single line.";
+    println!("{}", s);
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
 }
